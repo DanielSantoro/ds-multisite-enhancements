@@ -1,0 +1,8 @@
+/vendor/
+composer.lock
+*.zip
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
