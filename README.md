@@ -8,7 +8,7 @@ The package is `danielsantoro/ds-multisite-enhancements` (type `wordpress-plugin
 
 ```json
 "repositories": {
-    "dsme": { "type": "vcs", "url": "https://github.com/<owner>/ds-multisite-enhancements" }
+    "dsme": { "type": "vcs", "url": "https://github.com/DanielSantoro/ds-multisite-enhancements" }
 },
 "require": {
     "danielsantoro/ds-multisite-enhancements": "~0.0.1"
