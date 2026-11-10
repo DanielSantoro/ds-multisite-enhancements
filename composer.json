@@ -1,6 +1,6 @@
 {
     "name": "danielsantoro/ds-multisite-enhancements",
-    "description": "Network-level enhancements for WordPress Multisite, starting with stored per-post read times from a network-wide words-per-minute setting.",
+    "description": "A toolkit of network-level enhancements for WordPress Multisite networks at scale.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [

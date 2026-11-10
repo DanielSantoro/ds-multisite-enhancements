@@ -26,44 +26,13 @@ function dsme_get_words_per_minute(): int
     return ($wpm >= DSME_MIN_WPM && $wpm <= DSME_MAX_WPM) ? $wpm : DSME_DEFAULT_WPM;
 }
 
-/** Top-level menu slug (the Overview page). */
-define('DSME_MENU_SLUG', 'ds-multisite-enhancements');
-
 /** Read Time settings page slug. */
 define('DSME_READTIME_SLUG', 'dsme-read-time');
 
-/**
- * Network Admin menu: Multisite Enhancements (top level, below Settings)
- *   > Overview
- *   > Read Time
- *
- * WordPress hides a submenu that has a single item pointing at the parent
- * page, so the parent has its own Overview page and each feature gets its own
- * submenu page and slug. Add future features to dsme_get_features() and
- * register their page here.
- */
-add_action('network_admin_menu', 'dsme_register_settings_page');
-function dsme_register_settings_page(): void
+/** Submenu page under Network Admin > Multisite Enhancements. */
+add_action('network_admin_menu', 'dsme_readtime_register_settings_page', 20);
+function dsme_readtime_register_settings_page(): void
 {
-    add_menu_page(
-        __('Multisite Enhancements', 'ds-multisite-enhancements'),
-        __('Multisite Enhancements', 'ds-multisite-enhancements'),
-        'manage_network_options',
-        DSME_MENU_SLUG,
-        'dsme_render_overview_page',
-        'dashicons-networking',
-        26 // Network Admin Settings is 25; core uses nothing else before 99.
-    );
-
-    add_submenu_page(
-        DSME_MENU_SLUG,
-        __('Multisite Enhancements', 'ds-multisite-enhancements'),
-        __('Overview', 'ds-multisite-enhancements'),
-        'manage_network_options',
-        DSME_MENU_SLUG,
-        'dsme_render_overview_page'
-    );
-
     add_submenu_page(
         DSME_MENU_SLUG,
         __('Read Time', 'ds-multisite-enhancements'),
@@ -74,47 +43,16 @@ function dsme_register_settings_page(): void
     );
 }
 
-/**
- * Features listed on the Overview page: slug => [title, description].
- */
-function dsme_get_features(): array
+/** Overview page listing. */
+add_filter('dsme_features', 'dsme_readtime_register_feature');
+function dsme_readtime_register_feature(array $features): array
 {
-    return array(
-        DSME_READTIME_SLUG => array(
-            __('Read Time', 'ds-multisite-enhancements'),
-            __('Calculates each post\'s read time from a network-wide words-per-minute setting when it is published or updated, and shows it wherever the theme displays read time.', 'ds-multisite-enhancements'),
-        ),
+    $features[DSME_READTIME_SLUG] = array(
+        __('Read Time', 'ds-multisite-enhancements'),
+        __('Calculates each post\'s read time from a network-wide words-per-minute setting when it is published or updated, and shows it wherever the theme displays read time.', 'ds-multisite-enhancements'),
     );
-}
 
-function dsme_render_overview_page(): void
-{
-    if (! current_user_can('manage_network_options')) {
-        wp_die(esc_html__('You do not have permission to access this page.', 'ds-multisite-enhancements'));
-    }
-    ?>
-    <div class="wrap">
-        <h1><?php esc_html_e('Multisite Enhancements', 'ds-multisite-enhancements'); ?></h1>
-        <p><?php esc_html_e('Network-wide features for every site in this network. Choose a feature to configure it.', 'ds-multisite-enhancements'); ?></p>
-
-        <table class="widefat striped" style="max-width:900px">
-            <thead>
-                <tr>
-                    <th scope="col"><?php esc_html_e('Feature', 'ds-multisite-enhancements'); ?></th>
-                    <th scope="col"><?php esc_html_e('Description', 'ds-multisite-enhancements'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach (dsme_get_features() as $slug => $feature) : ?>
-                    <tr>
-                        <td><strong><a href="<?php echo esc_url(add_query_arg('page', $slug, network_admin_url('admin.php'))); ?>"><?php echo esc_html($feature[0]); ?></a></strong></td>
-                        <td><?php echo esc_html($feature[1]); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php
+    return $features;
 }
 
 function dsme_render_settings_page(): void
@@ -123,10 +61,9 @@ function dsme_render_settings_page(): void
         wp_die(esc_html__('You do not have permission to access this page.', 'ds-multisite-enhancements'));
     }
 
-
     $wpm = dsme_get_words_per_minute();
     ?>
-    <div class="wrap">
+    <div class="wrap dsme-wrap">
         <h1><?php esc_html_e('Read Time', 'ds-multisite-enhancements'); ?></h1>
 
         <?php if (isset($_GET['updated'])) : ?>

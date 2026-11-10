@@ -1,0 +1,13 @@
+{
+  "name": "ds-multisite-enhancements",
+  "private": true,
+  "description": "Build tooling for the DS Multisite Enhancements WordPress plugin (SCSS to CSS).",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "sass scss:css --style=compressed --no-source-map",
+    "watch": "sass scss:css --style=expanded --embed-source-map --watch"
+  },
+  "devDependencies": {
+    "sass": "1.83.4"
+  }
+}
