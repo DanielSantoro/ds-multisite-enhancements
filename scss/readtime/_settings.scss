@@ -1,0 +1,77 @@
+// Read Time settings pages (Network Admin and Settings > Read Time):
+// live preview, copyable snippets and documentation.
+
+@use "../core/variables" as *;
+
+// Show spaces in the before/after text exactly as they will render.
+.dsme-readtime-preview,
+.dsme-readtime-literal {
+    white-space: pre;
+}
+
+.dsme-readtime-preview {
+    display: inline-block;
+    margin: 0;
+    padding: 6px 10px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 14px;
+}
+
+.dsme-readtime-preview .dsme-readtime-value {
+    font-weight: 600;
+}
+
+.dsme-docs {
+    max-width: $dsme-content-max-width;
+    margin-top: 32px;
+    padding-top: 8px;
+    border-top: 1px solid #c3c4c7;
+}
+
+.dsme-docs h3 {
+    margin-top: 24px;
+}
+
+.dsme-docs-list {
+    margin-left: 2em;
+    list-style: disc;
+}
+
+ol.dsme-docs-list {
+    list-style: decimal;
+}
+
+.dsme-snippet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 12px;
+}
+
+.dsme-snippet pre,
+.dsme-docs-code {
+    margin: 0;
+    padding: 8px 12px;
+    overflow-x: auto;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+}
+
+.dsme-snippet pre {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dsme-snippet code,
+.dsme-docs-code code {
+    padding: 0;
+    background: none;
+}
+
+.dsme-copy-status {
+    color: #50575e;
+}

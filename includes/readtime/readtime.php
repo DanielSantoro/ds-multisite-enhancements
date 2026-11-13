@@ -1,6 +1,7 @@
 <?php
 /**
- * Read time: calculate on publish/update, store as post meta, display via shortcode.
+ * Read time: calculate on publish/update and store as post meta.
+ * Display (function, shortcode, block) is in display.php.
  *
  * Multisite: post meta lives in each site's own tables, so values are always
  * written and read in the post's own blog context. Network listings in the
@@ -42,7 +43,7 @@ function dsme_count_words(string $content): int
 /**
  * Words divided by words-per-minute, rounded up to the nearest whole minute,
  * with a minimum of 1 (posts with no countable words, such as ones built only
- * from dynamic blocks, still show "1 MIN READ" rather than 0).
+ * from dynamic blocks, still show a read time of 1 rather than 0).
  */
 function dsme_calculate_readtime(int $words, int $wpm): int
 {
@@ -54,13 +55,37 @@ function dsme_calculate_readtime(int $words, int $wpm): int
 }
 
 /**
- * Post types that get a read time: viewable types with an editor.
+ * Post types that get a read time: every viewable type except attachments,
+ * including custom post types (such as a "portfolio") registered without
+ * editor support.
  */
 function dsme_tracks_post_type(string $post_type): bool
 {
-    $tracked = post_type_supports($post_type, 'editor') && is_post_type_viewable($post_type);
+    $tracked = 'attachment' !== $post_type && post_type_exists($post_type) && is_post_type_viewable($post_type);
 
     return (bool) apply_filters('dsme_readtime_tracks_post_type', $tracked, $post_type);
+}
+
+/**
+ * Every tracked post type. Call it on or after init priority 99 so custom post
+ * types registered late are included.
+ *
+ * @return string[]
+ */
+function dsme_readtime_post_types(): array
+{
+    return array_values(array_filter(get_post_types(array('public' => true)), 'dsme_tracks_post_type'));
+}
+
+/**
+ * The text that is counted: the post's main content field (post_content),
+ * which every post type has whichever editor it uses. Post types that keep
+ * their text elsewhere (custom fields, for example) can supply it with the
+ * "dsme_readtime_content" filter.
+ */
+function dsme_readtime_post_content(WP_Post $post): string
+{
+    return (string) apply_filters('dsme_readtime_content', (string) $post->post_content, $post);
 }
 
 /**
@@ -74,7 +99,7 @@ function dsme_update_post_readtime(int $post_id): int
     }
 
     $wpm      = dsme_get_words_per_minute();
-    $words    = dsme_count_words((string) $post->post_content);
+    $words    = dsme_count_words(dsme_readtime_post_content($post));
     $readtime = dsme_calculate_readtime($words, $wpm);
 
     update_post_meta($post_id, DSME_META_WORDCOUNT, $words);
@@ -104,7 +129,8 @@ function dsme_on_save_post($post_id, $post, $update): void
 }
 
 /**
- * The read time to display, in minutes.
+ * The calculated read time, in minutes, before the minimum time and any
+ * per-post override are applied (see dsme_readtime_display_minutes()).
  *
  * Uses the stored "dsme-readtime" value. If it is missing (a post published
  * before this plugin was active) or was calculated with a different
@@ -143,79 +169,5 @@ function dsme_get_readtime($post = null): int
     }
 
     // Drafts and previews: calculate without saving.
-    return dsme_calculate_readtime(dsme_count_words((string) $post->post_content), $wpm);
-}
-
-/**
- * Shortcodes.
- *
- * [dsme_readtime] is this plugin's own tag. The existing [rt_reading_time]
- * tag (Reading Time WP), used throughout the theme, is taken over so every
- * call site shows the stored value with no template changes. Attributes and
- * HTML match Reading Time WP so existing styling still applies.
- * Disable the takeover with: add_filter('dsme_replace_rt_reading_time', '__return_false');
- */
-add_action('init', 'dsme_register_shortcodes', 20);
-function dsme_register_shortcodes(): void
-{
-    add_shortcode('dsme_readtime', 'dsme_readtime_shortcode');
-
-    if (apply_filters('dsme_replace_rt_reading_time', true)) {
-        remove_shortcode('rt_reading_time');
-        add_shortcode('rt_reading_time', 'dsme_readtime_shortcode');
-    }
-}
-
-/**
- * @param array|string $atts label, postfix, postfix_singular, post_id.
- */
-function dsme_readtime_shortcode($atts = array(), $content = null, $tag = 'dsme_readtime'): string
-{
-    $atts = shortcode_atts(
-        array(
-            'label'            => '',
-            'postfix'          => '',
-            'postfix_singular' => '',
-            'post_id'          => '',
-        ),
-        $atts,
-        $tag
-    );
-
-    $post_id = absint($atts['post_id']);
-    if (! $post_id || ! get_post_status($post_id)) {
-        $post_id = get_the_ID();
-    }
-
-    return dsme_readtime_html($post_id, $atts);
-}
-
-/**
- * Read-time markup for templates (tiles, bylines).
- *
- * Call it in the post's own blog context: on network listings, after
- * switch_to_blog() to the post's site. The HTML matches Reading Time WP's
- * output so existing CSS applies.
- *
- * @param int|WP_Post|null $post Post ID or object; defaults to the current post.
- * @param array            $args label, postfix (plural), postfix_singular.
- */
-function dsme_readtime_html($post = null, array $args = array()): string
-{
-    $args = wp_parse_args($args, array(
-        'label'            => '',
-        'postfix'          => 'MIN READ',
-        'postfix_singular' => 'MIN READ',
-    ));
-
-    $post    = get_post($post);
-    $post_id = $post ? (int) $post->ID : 0;
-    $minutes = dsme_get_readtime($post);
-    $postfix = ($minutes > 1) ? $args['postfix'] : $args['postfix_singular'];
-
-    $output = '<span class="span-reading-time rt-reading-time"><span class="rt-label rt-prefix">' . wp_kses_post($args['label'])
-        . '</span> <span class="rt-time"> ' . esc_html((string) $minutes) . '</span> <span class="rt-label rt-postfix">'
-        . wp_kses_post($postfix) . '</span></span>';
-
-    return (string) apply_filters('dsme_readtime_output', $output, $minutes, $args, $post_id);
+    return dsme_calculate_readtime(dsme_count_words(dsme_readtime_post_content($post)), $wpm);
 }

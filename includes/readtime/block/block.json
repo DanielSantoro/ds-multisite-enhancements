@@ -1,0 +1,16 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 2,
+    "name": "dsme/readtime",
+    "title": "Read Time",
+    "category": "theme",
+    "icon": "clock",
+    "description": "Shows the post's estimated read time, using the Read Time settings.",
+    "keywords": ["reading time", "minutes"],
+    "textdomain": "ds-multisite-enhancements",
+    "usesContext": ["postId", "postType"],
+    "supports": {
+        "html": false
+    },
+    "editorScript": "dsme-readtime-block"
+}

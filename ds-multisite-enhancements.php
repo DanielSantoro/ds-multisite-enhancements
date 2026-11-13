@@ -20,7 +20,7 @@ define('DSME_PATH', plugin_dir_path(__FILE__));
 define('DSME_URL', plugin_dir_url(__FILE__));
 
 /**
- * Features live in includes/ and are loaded automatically - there is no need to edit this file.
+ * Enabled features live in includes/ and are loaded automatically.
  *
  * - A single-file feature is includes/<feature>.php.
  * - A multi-file feature is a folder, includes/<feature>/, and every *.php file directly
@@ -29,7 +29,8 @@ define('DSME_URL', plugin_dir_url(__FILE__));
  * - Files and folders are loaded in natural order (natsort), so prefix names to control
  *   order (e.g. 00-foo.php, 10-bar/). Files inside a folder are ordered the same way.
  * - Names starting with "_" are skipped (e.g. _disabled-feature/ or _helper.php that a
- *   feature requires itself). To remove a feature, delete it or prefix it with "_".
+ *   feature requires itself). The 00-core folder is always loaded; other entries
+ *   load only when enabled in the network option dsme_enabled_features.
  */
 add_action('plugins_loaded', 'dsme_load_includes', 1);
 function dsme_load_includes(): void
@@ -88,9 +89,16 @@ function dsme_list_includes(string $dir): array
     natsort($entries);
 
     $files = array();
+    $enabled_features = get_site_option('dsme_enabled_features', array());
+    $enabled_features = is_array($enabled_features) ? $enabled_features : array();
 
     foreach ($entries as $entry) {
         if (dsme_skip_include($entry)) {
+            continue;
+        }
+
+        $feature = is_dir($entry) ? basename($entry) : pathinfo($entry, PATHINFO_FILENAME);
+        if ('00-core' !== $feature && empty($enabled_features[$feature])) {
             continue;
         }
 

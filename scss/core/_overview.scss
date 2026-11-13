@@ -1,7 +1,108 @@
 // Network Admin > Multisite Enhancements > Overview.
 
-@use "variables" as *;
+.dsme-feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 24px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #c3c4c7;
+}
 
-.dsme-overview-table {
-    max-width: $dsme-content-max-width;
+.dsme-feature h2 {
+    grid-column: 1 / -1;
+    margin: 0 0 4px;
+    padding: 0;
+    font-size: 15px;
+}
+
+.dsme-feature p {
+    grid-column: 1;
+    margin: 0;
+}
+
+// Aside: settings link, status and switch sit on the description line, below the title.
+.dsme-feature-form {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .dsme-feature {
+        grid-template-columns: 1fr;
+    }
+
+    .dsme-feature-form {
+        grid-column: 1;
+        grid-row: auto;
+        margin-top: 8px;
+    }
+}
+
+.dsme-feature-status {
+    color: #50575e;
+}
+
+.dsme-feature-submit[hidden],
+.dsme-feature-settings[hidden] {
+    display: none;
+}
+
+.dsme-switch {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+    flex: 0 0 32px;
+}
+
+.dsme-switch input[type="checkbox"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.dsme-switch-track {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 9px;
+    background: #646970;
+    pointer-events: none;
+}
+
+.dsme-switch-track::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s ease;
+}
+
+.dsme-switch input:checked + .dsme-switch-track {
+    background: #00a32a;
+}
+
+.dsme-switch input:checked + .dsme-switch-track::before {
+    transform: translateX(14px);
+}
+
+.dsme-switch input:focus-visible + .dsme-switch-track {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+}
+
+.dsme-switch input:disabled + .dsme-switch-track {
+    opacity: 0.6;
 }

@@ -1,6 +1,6 @@
 {
     "name": "danielsantoro/ds-multisite-enhancements",
-    "description": "A toolkit of network-level enhancements for WordPress Multisite networks at scale.",
+    "description": "A toolkit of administration enhancements for WordPress Multisite networks at scale.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [

@@ -1,0 +1,17 @@
+// Network Admin > Plugins > Plugin Use Check and Themes > Theme Use Check.
+
+@use "../core/variables" as *;
+
+.dsme-use-table {
+    max-width: $dsme-content-max-width;
+}
+
+.dsme-use-detail {
+    margin-left: 1em;
+    color: #646970;
+}
+
+.dsme-use-table .dsme-use-status {
+    width: 60px;
+    text-align: center;
+}

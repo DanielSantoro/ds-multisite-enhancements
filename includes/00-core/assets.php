@@ -23,3 +23,17 @@ function dsme_enqueue_admin_styles(): void
     // filemtime busts caches whenever the compiled CSS changes, without a version bump.
     wp_enqueue_style(DSME_ADMIN_STYLE, DSME_URL . $relative, array(), (string) filemtime($path));
 }
+
+add_action('admin_enqueue_scripts', 'dsme_enqueue_overview_script');
+function dsme_enqueue_overview_script(string $hook): void
+{
+    if (! is_network_admin() || 'toplevel_page_' . DSME_MENU_SLUG !== $hook) {
+        return;
+    }
+
+    $relative = 'js/overview.js';
+    $path = DSME_PATH . $relative;
+    if (file_exists($path)) {
+        wp_enqueue_script('dsme-overview', DSME_URL . $relative, array(), (string) filemtime($path), true);
+    }
+}
