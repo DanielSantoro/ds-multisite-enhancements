@@ -1,7 +1,8 @@
 .dsme-feature {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 24px;
+  -moz-column-gap: 24px;
+       column-gap: 24px;
   align-items: center;
   padding: 12px 0;
   border-bottom: 1px solid #c3c4c7;
